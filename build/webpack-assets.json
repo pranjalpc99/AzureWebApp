@@ -1,0 +1,14 @@
+{
+  "manifest": {
+    "js": "./bundle.js"
+  },
+  "main": {
+    "js": "./0.bundle.js"
+  },
+  "vendors": {
+    "js": "./2.bundle.js"
+  },
+  "": {
+    "html": "index.html"
+  }
+}
