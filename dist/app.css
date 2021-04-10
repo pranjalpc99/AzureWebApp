@@ -1,3 +1,83 @@
-html {
+html,
+body {
     font-family: sans-serif;
+    min-height: 100vh;
+    margin: 0px;
+    overflow-x: hidden;
+    overflow-y: hidden;
+    overflow: hidden;
+}
+
+footer {
+    flex: 0 1 40px;
+}
+
+.absolutePosition {
+    position: absolute;
+    z-index: 30;
+    bottom: 50px;
+    width: 100%;
+    margin: auto;
+    padding: 10px;
+    display: flex;
+    flex: 1;
+    align-items: stretch;
+    justify-content: center;
+}
+
+.centerElement {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.buttonCircle {
+    background-color: #4CAF50;
+    border: none;
+    color: white;
+    padding: 20px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+    margin: 4px 8px;
+    border-radius: 50%;
+}
+
+.remoteVideoPosition {
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 10;
+    height: 100%;
+    width: 100%;
+    background-color: black;
+}
+
+.remotePosition {
+    position: absolute;
+    height: 100%;
+    width: 100%;
+}
+
+.localVideoPosition {
+    position: absolute;
+    z-index: 20;
+    height: 20vh;
+    width: 100%;
+    background-color: transparent;
+    bottom: 150px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.myVideoPosition {
+    position: absolute;
+    bottom: 5px;
+    right: 5px;
+    width: 40vw;
+    max-width: 250px;
+    transform: translateY(50%), translateX(50%);
 }

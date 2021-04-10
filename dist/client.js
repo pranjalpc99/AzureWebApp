@@ -1,13 +1,25 @@
-import { CallClient, CallAgent, Renderer, LocalVideoStream } from "@azure/communication-calling";
+import { CallClient, CallAgent, Renderer, LocalVideoStream, CallApiFeature, CallFeatureFactoryType, Features } from "@azure/communication-calling";
 import { AzureCommunicationTokenCredential } from '@azure/communication-common';
 const { CommunicationIdentityClient } = require('@azure/communication-identity');
 //const { Connection, Request } = require("tedious");
-const { DefaultAzureCredential } = require("@azure/identity");
+const { InteractiveBrowserCredential } = require("@azure/identity");
+const { SecretClient } = require("@azure/keyvault-secrets");
 import { AzureLogger } from '@azure/logger';
 const { Howl, Howler } = require('howler');
 //const readline = require('readline');
+//const http = require('http');
+//const connect = require('connect');
+//import express from 'express';
+//var cors = require('cors');
+
+//import { hello } from "./app.js"
+
+//var app = require('express')();
+
+
 
 //var Connection = require('tedious').Connection;
+
 
 AzureLogger.verbose = (...args) => { console.info(...args); }
 AzureLogger.info = (...args) => { console.info(...args); }
@@ -23,12 +35,19 @@ const userTokenInput = document.getElementById("userToken-id-input");
 const calleeInput = document.getElementById("callee-id-input");
 const callButton = document.getElementById("call-button");
 const hangUpButton = document.getElementById("hang-up-button");
-const stopVideoButton = document.getElementById("stop-Video");
+const micButton = document.getElementById("mic-button");
+//const stopVideoButton = document.getElementById("stop-Video");
 const startVideoButton = document.getElementById("start-Video");
-//const setUserButton = document.getElementById("setUser-button")
-const acceptCallButton = document.getElementById("accept-Call");
+//const acceptCallButton = document.getElementById("accept-Call");
+const callerInfoDiv = document.getElementById("callerInfo");
+var callerName = document.getElementById("callerName");
+var localVideo = document.getElementById("myVideoContainer");
+var remoteVideo = document.getElementById("remoteVideoContainer");
 var sound;
 var x = document.getElementById("ringtone");
+var micState = true;
+var videoState = true;
+var videoCallState = false;
 
 // const config = {
 //     authentication: {
@@ -107,6 +126,30 @@ function subscribeToRemoteParticipantInCall(callInstance) {
 }
 
 const main = async() => {
+
+    //const credential = new InteractiveBrowserCredential({ redirectUri: "http://localhost:8080/", tenantId: "53f08148-43de-4a2b-bec3-1a9446ff6a20", clientId: "a5b5762c-c3f6-4980-96f2-670682cdd351" });
+    //console.log(credential)
+
+    //const vaultName = "azurepranjalvault";
+    //const url = "https://" + vaultName + ".vault.azure.net";
+
+    //const client = new SecretClient(url, credential);
+
+    //const secretName = "ConnectionString";
+
+    //httpRequestCall(client)
+
+
+    //var port = process.env.PORT || 8080;
+    //server.listen(port);
+
+    //console.log("Server running at http://localhost:%d", port);
+
+    //const retrievedSecret = await client.getSecret(secretName);
+
+    //console.log("Your secret is '" + retrievedSecret.value + "'.");
+
+
     // console.log("Azure Communication Services - Access Tokens Quickstart")
 
     // const keyVaultName = "azurepranjalvault";
@@ -123,6 +166,15 @@ const main = async() => {
     // console.log("Your secret is '" + retrievedSecret.value + "'.");
 
     // Quickstart code goes here
+    localVideo.style.display = "none";
+    remoteVideo.style.display = "none";
+    hangUpButton.style.display = "none";
+    callerInfoDiv.style.display = 'none';
+    //startVideoButton.style.display = "none";
+    //startVideoButton.style.display = "none";
+    //stopVideoButton.style.display = "none";
+    //acceptCallButton.style.display = "none";
+    console.log("Local Display -> " + localVideo.style.display)
     const identityClient = new CommunicationIdentityClient(communicationResourceString);
     let identityTokenResponse = await identityClient.createUserAndToken(["voip"]);
     const { token, expiresOn, user } = identityTokenResponse;
@@ -134,16 +186,28 @@ const main = async() => {
     initialize();
 };
 
+function httpRequestCall(client) {
+    var server = http.createServer(function(request, response) {
+        response.writeHead(200, { "Content-Type": "text/plain" });
+        async function main() {
+            // Get the secret we created
+            const secret = await client.getSecret(secretName);
+            response.write(`Your secret value is: ${secret.value}`);
+            response.end();
+        }
+        main().catch((err) => {
+            response.write(`error code: ${err.code}`);
+            response.write(`error message: ${err.message}`);
+            response.write(`error stack: ${err.stack}`);
+            response.end();
+        });
+    });
+}
+
 main().catch((error) => {
     console.log("Encountered an error");
     console.log(error);
 })
-
-async function init() {
-    console.log("init")
-        //setUserButton.disabled = false;
-}
-init();
 
 async function initialize() {
 
@@ -169,6 +233,8 @@ async function initialize() {
 
     deviceManager = await callClient.getDeviceManager();
     callButton.disabled = false;
+    micButton.disabled = false;
+    startVideoButton.disabled = false;
     console.log("call button prop" + callButton.disabled)
 
     callAgent.on('incomingCall', async e => {
@@ -178,16 +244,21 @@ async function initialize() {
         localVideoStream = new LocalVideoStream(videoDeviceInfo);
         localVideoView();
 
-        const callerIdentity = e.incomingCall.callerInfo.identifier;
+        const callerIdentity = e.incomingCall.callerInfo.displayName;
         const callState = e.incomingCall.state;
-        console.log("State->".concat(callerIdentity));
+        console.log("State->".concat(callState));
+        console.log("Caller->" + callerIdentity.toString())
+
+        callerInfoDiv.style.display = 'block';
+        callerName.innerHTML = e.incomingCall.id;
 
         playAudio();
 
-        stopVideoButton.disabled = false;
-        callButton.disabled = true;
+        //stopVideoButton.disabled = false;
+        //callButton.disabled = true;
         hangUpButton.disabled = false;
-        acceptCallButton.disabled = false;
+        //acceptCallButton.disabled = false;
+        videoCallState = true;
 
     });
 
@@ -199,7 +270,7 @@ async function initialize() {
             // toggle button states
             hangUpButton.disabled = true;
             callButton.disabled = false;
-            stopVideoButton.disabled = true;
+            //stopVideoButton.disabled = true;
         })
     })
 }
@@ -223,41 +294,105 @@ async function remoteVideoView(remoteVideoStream) {
 }
 
 callButton.addEventListener("click", async() => {
-    const videoDevices = await deviceManager.getCameras();
-    const videoDeviceInfo = videoDevices[0];
-    localVideoStream = new LocalVideoStream(videoDeviceInfo);
-    placeCallOptions = { videoOptions: { localVideoStreams: [localVideoStream] } };
 
-    localVideoView();
-    stopVideoButton.disabled = false;
-    startVideoButton.disabled = true;
+    console.log("Call button pressed - > " + videoCallState)
+    localVideo.style.display = 'block';
+    remoteVideo.style.display = 'block';
+    callButton.style.display = "none";
+    hangUpButton.style.display = "block";
+    startVideoButton.style.display = "block";
 
-    const userToCall = calleeInput.value;
-    call = callAgent.startCall(
-        [{ communicationUserId: userToCall }],
-        placeCallOptions
-    );
+    if (videoCallState == false) {
+
+        //startVideoButton.style.display = "block";
+        //stopVideoButton.style.display = "block";
+        //acceptCallButton.style.display = "block";
+
+        console.log("Local Display -> " + localVideo.style.display)
+
+        const videoDevices = await deviceManager.getCameras();
+        const videoDeviceInfo = videoDevices[0];
+        localVideoStream = new LocalVideoStream(videoDeviceInfo);
+        placeCallOptions = { videoOptions: { localVideoStreams: [localVideoStream] } };
+
+        localVideoView();
+        //stopVideoButton.disabled = false;
+        startVideoButton.disabled = true;
+
+        const userToCall = calleeInput.value;
+        call = callAgent.startCall(
+            [{ communicationUserId: userToCall }],
+            placeCallOptions
+        );
+
+        const callRecordingApi = call.api(Features.Recording);
+        const isResordingActive = callRecordingApi.isRecordingActive;
+        console.log("Is recording -> " + isResordingActive)
+        console.log("Is recording 2-> " + callRecordingApi.name)
 
 
-    subscribeToRemoteParticipantInCall(call);
+        subscribeToRemoteParticipantInCall(call);
 
-    hangUpButton.disabled = false;
-    callButton.disabled = true;
+        hangUpButton.disabled = false;
+        callButton.disabled = true;
+    } else {
+        x.pause();
+        const addedCall = await inCome.incomingCall.accept({ videoOptions: { localVideoStreams: [localVideoStream] } });
+        call = addedCall;
+
+        subscribeToRemoteParticipantInCall(addedCall);
+    }
+
+
 });
 
-stopVideoButton.addEventListener("click", async() => {
-    await call.stopVideo(localVideoStream);
-    rendererLocal.dispose();
-    startVideoButton.disabled = false;
-    stopVideoButton.disabled = true;
+// stopVideoButton.addEventListener("click", async() => {
+//     await call.stopVideo(localVideoStream);
+//     rendererLocal.dispose();
+//     startVideoButton.disabled = false;
+//     stopVideoButton.disabled = true;
 
-});
+// });
 
 startVideoButton.addEventListener("click", async() => {
-    await call.startVideo(localVideoStream);
-    localVideoView();
-    stopVideoButton.disabled = false;
-    startVideoButton.disabled = true;
+    if (videoState == true) {
+        videoState = false;
+        startVideoButton.innerHTML = "videocam_off"
+        if (!call) {
+            rendererLocal.dispose();
+        } else {
+            await call.stopVideo(localVideoStream);
+            rendererLocal.dispose();
+        }
+    } else {
+        videoState = true;
+        startVideoButton.innerHTML = "videocam"
+        if (!call) {
+            localVideoView();
+        } else {
+            await call.startVideo(localVideoStream);
+            localVideoView();
+            //stopVideoButton.disabled = false;
+            //startVideoButton.disabled = true;
+        }
+    }
+    console.log("Call state -> " + call);
+    console.log("Video state - > " + videoState);
+
+})
+
+micButton.addEventListener("click", async() => {
+    if (micState === true) {
+        micState = false
+        micButton.innerHTML = "mic_off"
+        await call.mute()
+    } else {
+        micState = true
+        micButton.innerHTML = "mic"
+        await call.unmute()
+    }
+
+    console.log("Mic state - > " + micState);
 })
 
 hangUpButton.addEventListener("click", async() => {
@@ -269,13 +404,18 @@ hangUpButton.addEventListener("click", async() => {
     // toggle button states
     hangUpButton.disabled = true;
     callButton.disabled = false;
-    stopVideoButton.disabled = true;
+    localVideo.style.display = 'none';
+    remoteVideo.style.display = 'none';
+    hangUpButton.style.display = 'none';
+    callerInfoDiv.style.display = 'none';
+    callButton.style.display = 'block';
+    //stopVideoButton.disabled = true;
 });
 
-acceptCallButton.addEventListener("click", async() => {
-    x.pause();
-    const addedCall = await inCome.incomingCall.accept({ videoOptions: { localVideoStreams: [localVideoStream] } });
-    call = addedCall;
+// acceptCallButton.addEventListener("click", async() => {
+//     x.pause();
+//     const addedCall = await inCome.incomingCall.accept({ videoOptions: { localVideoStreams: [localVideoStream] } });
+//     call = addedCall;
 
-    subscribeToRemoteParticipantInCall(addedCall);
-})
+//     subscribeToRemoteParticipantInCall(addedCall);
+// })
