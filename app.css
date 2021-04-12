@@ -2,7 +2,8 @@ html,
 body {
     font-family: sans-serif;
     min-height: 100vh;
-    margin: 0px;
+    margin: 0%S;
+    padding: 0%;
     overflow-x: hidden;
     overflow-y: hidden;
     overflow: hidden;
@@ -15,7 +16,7 @@ footer {
 .absolutePosition {
     position: absolute;
     z-index: 30;
-    bottom: 50px;
+    bottom: 30px;
     width: 100%;
     margin: auto;
     padding: 10px;
@@ -64,10 +65,10 @@ footer {
 .localVideoPosition {
     position: absolute;
     z-index: 20;
-    height: 20vh;
+    height: 10vh;
     width: 100%;
     background-color: transparent;
-    bottom: 150px;
+    bottom: 120px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -77,7 +78,8 @@ footer {
     position: absolute;
     bottom: 5px;
     right: 5px;
-    width: 40vw;
+    height: 20vh;
+    width: 20vw;
     max-width: 250px;
     transform: translateY(50%), translateX(50%);
 }

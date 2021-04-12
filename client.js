@@ -48,6 +48,8 @@ var x = document.getElementById("ringtone");
 var micState = true;
 var videoState = true;
 var videoCallState = false;
+var width;
+var height;
 
 // const config = {
 //     authentication: {
@@ -225,6 +227,9 @@ async function initialize() {
     //     });
 
     userIdText.innerHTML = userId;
+    width = window.innerWidth || document.documentElement.clientWidth || document.body.clientWidth;
+
+    height = window.innerHeight || document.documentElement.clientHeight || document.body.clientHeight;
 
     const callClient = new CallClient({ logger: AzureLogger });
     const tokenCredential = new AzureCommunicationTokenCredential(userToken);
@@ -270,6 +275,11 @@ async function initialize() {
             // toggle button states
             hangUpButton.disabled = true;
             callButton.disabled = false;
+            localVideo.style.display = 'none';
+            remoteVideo.style.display = 'none';
+            hangUpButton.style.display = 'none';
+            callerInfoDiv.style.display = 'none';
+            callButton.style.display = 'block';
             //stopVideoButton.disabled = true;
         })
     })
@@ -284,12 +294,15 @@ async function playAudio() {
 async function localVideoView() {
     rendererLocal = new Renderer(localVideoStream);
     const view = await rendererLocal.createView();
+    view.updateScalingMode('Fit');
     document.getElementById("myVideo").appendChild(view.target);
+
 }
 
 async function remoteVideoView(remoteVideoStream) {
     rendererRemote = new Renderer(remoteVideoStream);
     const view = await rendererRemote.createView();
+    view.updateScalingMode('Fit');
     document.getElementById("remoteVideo").appendChild(view.target);
 }
 
