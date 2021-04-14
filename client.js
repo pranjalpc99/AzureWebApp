@@ -29,7 +29,7 @@ AzureLogger.error = (...args) => { console.info(...args); }
 let call;
 let callAgent;
 let inCome;
-const communicationResourceString = "endpoint=https://testapicommunication.communication.azure.com/;accesskey=so6HgfoI5ukEaaiaBIHHvxidJrNAhLBs+hNwaj3fCU4VX1HfugSFW9/2sml3sp/IQ+WoOLILTFiLDwP49/7nMQ=="
+const communicationResourceString = "endpoint=https://azurecommunication.communication.azure.com/;accesskey=W6Ltbn66XCRIT4r5CtVBu3+rQXNvaOv7PFUw2vkQs0Vop3VubYLtZj/S0pgrtX9dYgKJI/Vxw9/boyKoqd0bjg=="
 const userIdText = document.getElementById("myUserId");
 const userTokenInput = document.getElementById("userToken-id-input");
 const calleeInput = document.getElementById("callee-id-input");
